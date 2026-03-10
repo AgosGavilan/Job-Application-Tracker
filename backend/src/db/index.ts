@@ -14,8 +14,8 @@ pool.on('error', (err) => { //maneja errores de conexión a la base de datos
     process.exit(-1); //si hay un error, se sale del proceso con un código de error -1
 });
 
-export const query = (text: string, params?: unknown[]) => {
-    return pool.query(text, params);
+export const query = (text: string, params?: unknown[]) => { //función para ejecutar consultas a la base de datos
+    return pool.query(text, params); //ejecuta la consulta a la base de datos
   };
 
 export default pool;
