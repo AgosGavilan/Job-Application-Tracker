@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS users (
-  id          SERIAL PRIMARY KEY,
+  id          SERIAL PRIMARY KEY, /*id del usuario*/
   email       VARCHAR(255) UNIQUE NOT NULL,
   password_hash VARCHAR(255) NOT NULL,
   name        VARCHAR(100) NOT NULL,
@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 CREATE TABLE IF NOT EXISTS applications (
-  id             SERIAL PRIMARY KEY,
+  id             SERIAL PRIMARY KEY, /*id de la postulacion*/
   user_id        INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   company        VARCHAR(100) NOT NULL,
   position       VARCHAR(150) NOT NULL,

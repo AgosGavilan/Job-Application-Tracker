@@ -28,7 +28,7 @@ export const register = async (req: Request, res: Response) => {
             return res.status(409).json({ message: 'El email ya está registrado' });
         }
 
-        //hashear la contraseña
+        //hasheamos la contraseña
         const password_hash = await bcrypt.hash(password, 10);
 
         //guardar el usuario en la base de datos
