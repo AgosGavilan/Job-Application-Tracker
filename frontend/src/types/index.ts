@@ -5,6 +5,7 @@ export interface User {
 }
 
 export interface Application {
+  //clave: tipo
     id: number;
     user_id: number;
     company: string;
