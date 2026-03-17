@@ -1,14 +1,20 @@
 import { useState } from 'react';
+import { ClipboardList } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useApplications } from '../hooks/useApplications';
-import ApplicationCard from '../components/ApplicationCard';
+import Navbar from '../components/NavBar';
+import ApplicationTable from '../components/ApplicationTable';
 import ApplicationForm from '../components/ApplicationForm';
 import StatsPanel from '../components/StatsPanel';
 import type { Application } from '../types';
 
 const Home = () => {
-  const { user, logout } = useAuth();
-  const { applications, loading, error, createApplication, updateApplication, deleteApplication, statsVersion } = useApplications();
+  const { user } = useAuth();
+  const {
+    applications, loading, error,
+    createApplication, updateApplication, deleteApplication,
+    statsVersion,
+  } = useApplications();
 
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Application | null>(null);
@@ -26,68 +32,59 @@ const Home = () => {
     return result;
   };
 
-  const handleStatusChange = async (id: number, status: Application['status']) => {
-    await updateApplication(id, { status });
-  };
-
   return (
-    <div style={{ maxWidth: 800, margin: '0 auto', padding: '32px 20px' }}>
+    <>
+      <Navbar onNewApplication={() => setShowForm(true)} />
 
-      {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
-        <div>
-          <h1 style={{ margin: 0, fontSize: 28 }}>Mis postulaciones</h1>
-          <p style={{ margin: '4px 0 0', color: '#6B7280' }}>Hola, {user?.name} 👋</p>
+      <div style={{ padding: '28px 28px', maxWidth: 1200, margin: '0 auto' }}>
+
+        {/* Header */}
+        <div style={{ marginBottom: 24 }}>
+          <h1 style={{ fontSize: 22, fontWeight: 600, color: 'var(--color-text-primary)', letterSpacing: '-0.03em' }}>
+            Buen día, {user?.name.split(' ')[0]} 👋
+          </h1>
+          <p style={{ fontSize: 13, color: 'var(--color-text-secondary)', marginTop: 3 }}>
+            {applications.length} postulaciones activas
+          </p>
         </div>
-        <div style={{ display: 'flex', gap: 12 }}>
-          <button
-            onClick={() => setShowForm(true)}
-            style={{
-              padding: '8px 20px', borderRadius: 8, border: 'none',
-              backgroundColor: '#3B82F6', color: '#fff', cursor: 'pointer',
-              fontWeight: 600, fontSize: 14,
-            }}
-          >
-            + Nueva postulación
-          </button>
-          <button
-            onClick={logout}
-            style={{
-              padding: '8px 16px', borderRadius: 8, border: '1px solid #D1D5DB',
-              backgroundColor: '#fff', cursor: 'pointer', fontSize: 14,
-            }}
-          >
-            Salir
-          </button>
+
+        {/* Stats + gráficos */}
+        <StatsPanel refetchTrigger={statsVersion} />
+
+        {/* Tabla */}
+        <div style={{
+          background: 'var(--color-surface)',
+          borderRadius: 'var(--radius-lg)',
+          border: '0.5px solid var(--color-border)',
+          padding: '18px 20px',
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+            <h2 style={{ fontSize: 13.5, fontWeight: 600 }}>Postulaciones</h2>
+            <span style={{ fontSize: 12, color: 'var(--color-text-secondary)' }}>
+              {applications.length} en total
+            </span>
+          </div>
+
+          {loading && <p style={{ fontSize: 13, color: 'var(--color-text-secondary)' }}>Cargando...</p>}
+          {error && <p style={{ fontSize: 13, color: 'var(--color-red)' }}>{error}</p>}
+
+          {!loading && applications.length === 0 && (
+            <div style={{ textAlign: 'center', padding: '48px 0', color: 'var(--color-text-secondary)' }}>
+              <ClipboardList size={36} color="var(--color-text-muted)" style={{ margin: '0 auto 12px', display: 'block' }} />
+              <p style={{ fontSize: 15, fontWeight: 500 }}>Todavía no tenés postulaciones</p>
+              <p style={{ fontSize: 13, marginTop: 4 }}>Usá el botón "Nueva postulación" para empezar</p>
+            </div>
+          )}
+
+          <ApplicationTable
+            applications={applications}
+            onEdit={setEditing}
+            onDelete={deleteApplication}
+            onStatusChange={(id, status) => updateApplication(id, { status })}
+          />
         </div>
       </div>
 
-      {/* Resumen rápido */}
-      <StatsPanel refetchTrigger={statsVersion} />
-
-      {/* Lista */}
-      {loading && <p style={{ color: '#6B7280' }}>Cargando...</p>}
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-
-      {!loading && applications.length === 0 && (
-        <div style={{ textAlign: 'center', padding: '60px 0', color: '#9CA3AF' }}>
-          <p style={{ fontSize: 48 }}>📋</p>
-          <p style={{ fontSize: 18 }}>Todavía no tenés postulaciones</p>
-          <p style={{ fontSize: 14 }}>Hacé clic en "Nueva postulación" para empezar</p>
-        </div>
-      )}
-
-      {applications.map((app) => (
-        <ApplicationCard
-          key={app.id}
-          application={app}
-          onEdit={(app) => setEditing(app)}
-          onDelete={deleteApplication}
-          onStatusChange={handleStatusChange}
-        />
-      ))}
-
-      {/* Modal crear */}
       {showForm && (
         <ApplicationForm
           onSubmit={handleCreate}
@@ -95,7 +92,6 @@ const Home = () => {
         />
       )}
 
-      {/* Modal editar */}
       {editing && (
         <ApplicationForm
           initial={editing}
@@ -103,7 +99,7 @@ const Home = () => {
           onCancel={() => setEditing(null)}
         />
       )}
-    </div>
+    </>
   );
 };
 

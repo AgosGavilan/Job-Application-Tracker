@@ -9,11 +9,19 @@ export const statusLabels: Record<Application['status'], string> = {
 };
 
 export const statusColors: Record<Application['status'], string> = {
-  applied:     '#3B82F6',  // azul
-  in_progress: '#F59E0B',  // amarillo
-  interview:   '#8B5CF6',  // violeta
-  rejected:    '#EF4444',  // rojo
-  offer:       '#10B981',  // verde
+  applied:     'var(--color-primary)',
+  in_progress: 'var(--color-amber)',
+  interview:   'var(--color-blue)',
+  rejected:    'var(--color-red)',
+  offer:       'var(--color-green)',
+};
+
+export const statusBgColors: Record<Application['status'], string> = {
+  applied:     'var(--color-primary-light)',
+  in_progress: 'var(--color-amber-light)',
+  interview:   'var(--color-blue-light)',
+  rejected:    'var(--color-red-light)',
+  offer:       'var(--color-green-light)',
 };
 
 export const channelLabels: Record<Application['channel'], string> = {
@@ -22,7 +30,6 @@ export const channelLabels: Record<Application['channel'], string> = {
   referral: 'Referido',
   other:    'Otro',
 };
-
 //Record<Application['status'], string>
 //se traduce a:
 //{
