@@ -6,6 +6,9 @@ export const useApplications = () => {
     const [applications, setApplications] = useState<Application[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [statsVersion, setStatsVersion] = useState(0);
+
+    const bump = () => setStatsVersion((v) => v + 1);
 
     // ─── CARGAR TODAS ─────────────────────────────────────────
     const fetchApplications = async () => {
@@ -26,6 +29,7 @@ export const useApplications = () => {
         try {
             const response = await applicationsService.create(data);
             setApplications((prev) => [response.data, ...prev]);
+            bump();
             return { success: true };
         } catch (err: any) {
             return { success: false, error: err.response?.data?.error || 'Error al crear' };
@@ -39,6 +43,7 @@ export const useApplications = () => {
             setApplications((prev) =>
                 prev.map((app) => (app.id === id ? response.data : app))
             );
+            bump();
             return { success: true };
         } catch (err: any) {
             return { success: false, error: err.response?.data?.error || 'Error al actualizar' };
@@ -50,6 +55,7 @@ export const useApplications = () => {
         try {
             await applicationsService.delete(id);
             setApplications((prev) => prev.filter((app) => app.id !== id));
+            bump();
             return { success: true };
         } catch (err: any) {
             return { success: false, error: err.response?.data?.error || 'Error al eliminar' };
@@ -68,6 +74,7 @@ export const useApplications = () => {
         updateApplication,
         deleteApplication,
         refetch: fetchApplications,
+        statsVersion
     };
 }
 

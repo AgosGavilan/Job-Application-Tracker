@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth.routes'
 import applicationsRoutes from './routes/applications.routes'
+import statsRoutes from './routes/stats.routes';
 
 dotenv.config();
 
@@ -15,6 +16,7 @@ app.use(express.json());
 //RUTAS
 app.use('/api/auth', authRoutes)
 app.use('/api/applications', applicationsRoutes);
+app.use('/api/stats', statsRoutes);
 
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok' });

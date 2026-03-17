@@ -3,11 +3,12 @@ import { useAuth } from '../hooks/useAuth';
 import { useApplications } from '../hooks/useApplications';
 import ApplicationCard from '../components/ApplicationCard';
 import ApplicationForm from '../components/ApplicationForm';
+import StatsPanel from '../components/StatsPanel';
 import type { Application } from '../types';
 
 const Home = () => {
   const { user, logout } = useAuth();
-  const { applications, loading, error, createApplication, updateApplication, deleteApplication } = useApplications();
+  const { applications, loading, error, createApplication, updateApplication, deleteApplication, statsVersion } = useApplications();
 
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Application | null>(null);
@@ -62,22 +63,7 @@ const Home = () => {
       </div>
 
       {/* Resumen rápido */}
-      <div style={{ display: 'flex', gap: 12, marginBottom: 32, flexWrap: 'wrap' }}>
-        {[
-          { label: 'Total', value: applications.length, color: '#6B7280' },
-          { label: 'Entrevistas', value: applications.filter(a => a.status === 'interview').length, color: '#8B5CF6' },
-          { label: 'Ofertas', value: applications.filter(a => a.status === 'offer').length, color: '#10B981' },
-          { label: 'Rechazados', value: applications.filter(a => a.status === 'rejected').length, color: '#EF4444' },
-        ].map(({ label, value, color }) => (
-          <div key={label} style={{
-            flex: 1, minWidth: 120, padding: '16px 20px', borderRadius: 8,
-            backgroundColor: '#fff', border: '1px solid #E5E7EB', textAlign: 'center',
-          }}>
-            <p style={{ margin: 0, fontSize: 28, fontWeight: 700, color }}>{value}</p>
-            <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6B7280' }}>{label}</p>
-          </div>
-        ))}
-      </div>
+      <StatsPanel refetchTrigger={statsVersion} />
 
       {/* Lista */}
       {loading && <p style={{ color: '#6B7280' }}>Cargando...</p>}
