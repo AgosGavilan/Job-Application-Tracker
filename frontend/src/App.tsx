@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Home from './pages/Home';
+import Applications from './pages/Applications';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 import { ThemeProvider } from './context/themeContext';
@@ -20,6 +21,7 @@ function App() {
                 <Layout>
                   <Routes>
                     <Route path="/" element={<Home />} />
+                    <Route path='/apps' element={<Applications />} />
                     <Route path="*" element={<Navigate to="/" replace />} />
                   </Routes>
                 </Layout>
