@@ -75,4 +75,11 @@ input, select, textarea { font-family: var(--font); }
 
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
   --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
+
+  --color-surface:       #1A1A1A;
+  --color-bg:            #0F0F0F;
+
+  input, select, textarea {
+    color-scheme: dark;
+  }
 }

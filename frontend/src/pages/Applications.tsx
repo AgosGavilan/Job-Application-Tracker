@@ -20,6 +20,20 @@ const Applications = () => {
     const [search, setSearch] = useState('');
     const [filterStatus, setFilterStatus] = useState<string>('all');
     const [filterChannel, setFilterChannel] = useState<string>('all');
+    const [showFilters, setShowFilters] = useState(false);
+
+    const activeFilters = (filterStatus !== 'all' ? 1 : 0) + (filterChannel !== 'all' ? 1 : 0);
+
+    const filtered = useMemo(() => {
+        return applications.filter(app => {
+            const matchSearch =
+                app.company.toLowerCase().includes(search.toLowerCase()) ||
+                app.position.toLowerCase().includes(search.toLowerCase());
+            const matchStatus = filterStatus === 'all' || app.status === filterStatus;
+            const matchChannel = filterChannel === 'all' || app.channel === filterChannel;
+            return matchSearch && matchStatus && matchChannel;
+        });
+    }, [applications, search, filterStatus, filterChannel]);
 
     const handleCreate = async (data: Partial<Application>) => {
         const result = await createApplication(data);
@@ -34,18 +48,6 @@ const Applications = () => {
         return result;
     };
 
-    // Filtrado
-    const filtered = useMemo(() => {
-        return applications.filter(app => {
-            const matchSearch =
-                app.company.toLowerCase().includes(search.toLowerCase()) ||
-                app.position.toLowerCase().includes(search.toLowerCase());
-            const matchStatus = filterStatus === 'all' || app.status === filterStatus;
-            const matchChannel = filterChannel === 'all' || app.channel === filterChannel;
-            return matchSearch && matchStatus && matchChannel;
-        });
-    }, [applications, search, filterStatus, filterChannel]);
-
     const selectStyle: React.CSSProperties = {
         padding: '8px 12px',
         borderRadius: 'var(--radius-md)',
@@ -56,6 +58,16 @@ const Applications = () => {
         fontFamily: 'var(--font)',
         outline: 'none',
     };
+
+    const pillBtn = (active: boolean): React.CSSProperties => ({
+        padding: '6px 14px',
+        borderRadius: 'var(--radius-full)',
+        border: '0.5px solid var(--color-border)',
+        background: active ? 'var(--color-primary)' : 'var(--color-bg)',
+        color: active ? '#fff' : 'var(--color-text-primary)',
+        fontSize: 13, fontWeight: active ? 500 : 400,
+        cursor: 'pointer', fontFamily: 'var(--font)',
+    });
 
     return (
         <>
@@ -88,11 +100,11 @@ const Applications = () => {
                     marginBottom: 14,
                     display: 'flex',
                     gap: 10,
-                    flexWrap: 'wrap',
                     alignItems: 'center',
+                    flexWrap: 'wrap',
                 }}>
 
-                    {/* Búsqueda */}
+                    {/* Búsqueda — siempre visible */}
                     <div style={{ position: 'relative', flex: 1, minWidth: 180 }}>
                         <Search
                             size={14}
@@ -112,53 +124,76 @@ const Applications = () => {
                                 color: 'var(--color-text-primary)',
                                 fontSize: 13, outline: 'none',
                                 fontFamily: 'var(--font)',
-                                boxSizing: 'border-box',
+                                boxSizing: 'border-box' as const,
                             }}
                         />
                     </div>
 
-                    {/* Filtro estado */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <Filter size={13} color="var(--color-text-secondary)" />
-                        <select
-                            value={filterStatus}
-                            onChange={e => setFilterStatus(e.target.value)}
-                            style={selectStyle}
-                        >
-                            <option value="all">Todos los estados</option>
-                            {Object.entries(statusLabels).map(([value, label]) => (
-                                <option key={value} value={value}>{label}</option>
-                            ))}
-                        </select>
-                    </div>
+                    {/* Desktop — selects */}
+                    {!isMobile && (
+                        <>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                <Filter size={13} color="var(--color-text-secondary)" />
+                                <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} style={selectStyle}>
+                                    <option value="all">Todos los estados</option>
+                                    {Object.entries(statusLabels).map(([value, label]) => (
+                                        <option key={value} value={value}>{label}</option>
+                                    ))}
+                                </select>
+                            </div>
 
-                    {/* Filtro canal */}
-                    <select
-                        value={filterChannel}
-                        onChange={e => setFilterChannel(e.target.value)}
-                        style={selectStyle}
-                    >
-                        <option value="all">Todos los canales</option>
-                        {Object.entries(channelLabels).map(([value, label]) => (
-                            <option key={value} value={value}>{label}</option>
-                        ))}
-                    </select>
+                            <select value={filterChannel} onChange={e => setFilterChannel(e.target.value)} style={selectStyle}>
+                                <option value="all">Todos los canales</option>
+                                {Object.entries(channelLabels).map(([value, label]) => (
+                                    <option key={value} value={value}>{label}</option>
+                                ))}
+                            </select>
 
-                    {/* Limpiar filtros */}
-                    {(search || filterStatus !== 'all' || filterChannel !== 'all') && (
+                            {(search || filterStatus !== 'all' || filterChannel !== 'all') && (
+                                <button
+                                    onClick={() => { setSearch(''); setFilterStatus('all'); setFilterChannel('all'); }}
+                                    style={{
+                                        padding: '8px 12px', borderRadius: 'var(--radius-md)',
+                                        border: '0.5px solid var(--color-border)',
+                                        background: 'var(--color-bg)',
+                                        color: 'var(--color-text-secondary)',
+                                        fontSize: 12.5, cursor: 'pointer', fontFamily: 'var(--font)',
+                                    }}
+                                >
+                                    Limpiar
+                                </button>
+                            )}
+                        </>
+                    )}
+
+                    {/* Mobile — botón filtros */}
+                    {isMobile && (
                         <button
-                            onClick={() => { setSearch(''); setFilterStatus('all'); setFilterChannel('all'); }}
+                            onClick={() => setShowFilters(true)}
                             style={{
+                                display: 'flex', alignItems: 'center', gap: 6,
                                 padding: '8px 12px',
                                 borderRadius: 'var(--radius-md)',
                                 border: '0.5px solid var(--color-border)',
-                                background: 'var(--color-bg)',
-                                color: 'var(--color-text-secondary)',
-                                fontSize: 12.5, cursor: 'pointer',
-                                fontFamily: 'var(--font)',
+                                background: activeFilters > 0 ? 'var(--color-primary-light)' : 'var(--color-bg)',
+                                color: activeFilters > 0 ? 'var(--color-primary)' : 'var(--color-text-secondary)',
+                                fontSize: 13, fontWeight: activeFilters > 0 ? 500 : 400,
+                                cursor: 'pointer', fontFamily: 'var(--font)',
+                                flexShrink: 0,
                             }}
                         >
-                            Limpiar
+                            <Filter size={14} />
+                            Filtros
+                            {activeFilters > 0 && (
+                                <span style={{
+                                    width: 18, height: 18, borderRadius: '50%',
+                                    background: 'var(--color-primary)',
+                                    color: '#fff', fontSize: 10, fontWeight: 600,
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                }}>
+                                    {activeFilters}
+                                </span>
+                            )}
                         </button>
                     )}
                 </div>
@@ -169,8 +204,9 @@ const Applications = () => {
                     borderRadius: 'var(--radius-lg)',
                     border: '0.5px solid var(--color-border)',
                     padding: isMobile ? '14px' : '18px 20px',
+                    maxHeight: isMobile ? '60vh' : '65vh',
+                    overflowY: 'auto',
                 }}>
-
                     {loading && (
                         <p style={{ fontSize: 13, color: 'var(--color-text-secondary)' }}>Cargando...</p>
                     )}
@@ -203,6 +239,7 @@ const Applications = () => {
                 </div>
             </div>
 
+            {/* Modales — fuera del div principal */}
             {showForm && (
                 <ApplicationForm
                     onSubmit={handleCreate}
@@ -216,6 +253,103 @@ const Applications = () => {
                     onSubmit={handleUpdate}
                     onCancel={() => setEditing(null)}
                 />
+            )}
+
+            {/* Modal filtros mobile */}
+            {isMobile && showFilters && (
+                <>
+                    <div
+                        onClick={() => setShowFilters(false)}
+                        style={{
+                            position: 'fixed', inset: 0,
+                            background: 'rgba(0,0,0,0.4)',
+                            zIndex: 100,
+                        }}
+                    />
+                    <div style={{
+                        position: 'fixed', bottom: 0, left: 0, right: 0,
+                        background: 'var(--color-surface)',
+                        borderRadius: '16px 16px 0 0',
+                        border: '0.5px solid var(--color-border)',
+                        padding: '20px 20px 32px',
+                        zIndex: 101,
+                        boxShadow: 'var(--shadow-md)',
+                    }}>
+
+                        {/* Handle */}
+                        <div style={{
+                            width: 36, height: 4, borderRadius: 99,
+                            background: 'var(--color-border)',
+                            margin: '0 auto 20px',
+                        }} />
+
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                            <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--color-text-primary)' }}>Filtros</span>
+                            {activeFilters > 0 && (
+                                <button
+                                    onClick={() => { setFilterStatus('all'); setFilterChannel('all'); }}
+                                    style={{
+                                        fontSize: 12.5, color: 'var(--color-primary)',
+                                        background: 'none', border: 'none',
+                                        cursor: 'pointer', fontFamily: 'var(--font)',
+                                    }}
+                                >
+                                    Limpiar todo
+                                </button>
+                            )}
+                        </div>
+
+                        {/* Estado */}
+                        <div style={{ marginBottom: 20 }}>
+                            <label style={{
+                                fontSize: 12, fontWeight: 500, color: 'var(--color-text-secondary)',
+                                display: 'block', marginBottom: 8,
+                                letterSpacing: '0.04em', textTransform: 'uppercase' as const,
+                            }}>
+                                Estado
+                            </label>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                                {[{ value: 'all', label: 'Todos' }, ...Object.entries(statusLabels).map(([value, label]) => ({ value, label }))].map(({ value, label }) => (
+                                    <button key={value} onClick={() => setFilterStatus(value)} style={pillBtn(filterStatus === value)}>
+                                        {label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Canal */}
+                        <div style={{ marginBottom: 24 }}>
+                            <label style={{
+                                fontSize: 12, fontWeight: 500, color: 'var(--color-text-secondary)',
+                                display: 'block', marginBottom: 8,
+                                letterSpacing: '0.04em', textTransform: 'uppercase' as const,
+                            }}>
+                                Canal
+                            </label>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                                {[{ value: 'all', label: 'Todos' }, ...Object.entries(channelLabels).map(([value, label]) => ({ value, label }))].map(({ value, label }) => (
+                                    <button key={value} onClick={() => setFilterChannel(value)} style={pillBtn(filterChannel === value)}>
+                                        {label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Botón aplicar */}
+                        <button
+                            onClick={() => setShowFilters(false)}
+                            style={{
+                                width: '100%', padding: '12px',
+                                background: 'var(--color-primary)', color: '#fff',
+                                border: 'none', borderRadius: 'var(--radius-md)',
+                                fontSize: 14, fontWeight: 500, cursor: 'pointer',
+                                fontFamily: 'var(--font)',
+                            }}
+                        >
+                            Ver {filtered.length} resultado{filtered.length !== 1 ? 's' : ''}
+                        </button>
+                    </div>
+                </>
             )}
         </>
     );

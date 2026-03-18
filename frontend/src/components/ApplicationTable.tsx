@@ -22,7 +22,7 @@ const ApplicationTable = ({ applications, onEdit, onDelete, onStatusChange }: Pr
 
   return (
     <div style={{ overflowX: 'auto' }}>
-      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: isMobile ? 320 : 'auto' }}>
         <thead>
           <tr>
             <th style={{ fontSize: 11, fontWeight: 500, color: 'var(--color-text-secondary)', textAlign: 'left', padding: '0 10px 10px', borderBottom: '0.5px solid #F3F2F0' }}>Empresa</th>
@@ -32,6 +32,7 @@ const ApplicationTable = ({ applications, onEdit, onDelete, onStatusChange }: Pr
             <th style={{ borderBottom: '0.5px solid #F3F2F0' }}></th>
           </tr>
         </thead>
+
         <tbody>
           {applications.map((app) => {
             const { id, company, position, status, channel, applied_at } = app;
