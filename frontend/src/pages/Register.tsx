@@ -23,7 +23,7 @@ const Register = () => {
     return (
         <div style={{
             minHeight: '100vh', background: 'var(--color-bg)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px 16px',
         }}>
             <div style={{ width: '100%', maxWidth: 420 }}>
 

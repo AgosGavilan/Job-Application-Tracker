@@ -3,6 +3,7 @@ import { ClipboardList, Users, TrendingUp, Star, Clock, BarChart2, ChevronLeft, 
 import { useStats } from '../hooks/useStats';
 import { statusLabels } from '../utils/statusHelpers';
 import type { Application } from '../types';
+import { useWindowSize } from '../hooks/useWindowSize';
 
 interface Props {
   refetchTrigger?: number;
@@ -202,6 +203,7 @@ const StatCard = ({ icon: Icon, iconBg, iconColor, label, value, delta, deltaUp 
 // ─── StatsPanel ───────────────────────────────────────────────
 const StatsPanel = ({ refetchTrigger, applications }: Props) => {
   const { summary, loading } = useStats(refetchTrigger);
+  const { isMobile } = useWindowSize();
 
   if (loading) return (
     <p style={{ fontSize: 13, color: 'var(--color-text-secondary)', marginBottom: 24 }}>
@@ -220,7 +222,7 @@ const StatsPanel = ({ refetchTrigger, applications }: Props) => {
   return (
     <div style={{
       display: 'grid',
-      gridTemplateColumns: '1fr 230px',
+      gridTemplateColumns: isMobile ? '1fr' : '1fr 230px',
       gap: 14,
       marginBottom: 24,
     }}>
@@ -245,7 +247,7 @@ const StatsPanel = ({ refetchTrigger, applications }: Props) => {
             </p>
           </div>
         ) : (
-          <div style={{ display: 'flex', gap: 24 }}>
+          <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? 16 : 24 }}>
 
             {/* Barras horizontales */}
             <div style={{ flex: 1 }}>

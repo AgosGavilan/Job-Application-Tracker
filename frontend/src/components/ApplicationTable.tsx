@@ -1,8 +1,9 @@
-import { Pencil, Trash2 } from 'lucide-react';
+import { Pencil, Trash2, MoreVertical } from 'lucide-react';
 import type { Application } from '../types';
 import { statusLabels, statusColors, statusBgColors, channelLabels } from '../utils/statusHelpers';
 import { useState } from 'react';
 import ConfirmModal from './ConfirmModal';
+import { useWindowSize } from '../hooks/useWindowSize';
 
 interface Props {
   applications: Application[];
@@ -14,6 +15,8 @@ interface Props {
 const ApplicationTable = ({ applications, onEdit, onDelete, onStatusChange }: Props) => {
   const [confirmId, setConfirmId] = useState<number | null>(null);
   const [confirmCompany, setConfirmCompany] = useState('');
+  const { isMobile } = useWindowSize();
+  const [openMenuId, setOpenMenuId] = useState<number | null>(null);
 
   if (applications.length === 0) return null;
 
@@ -22,16 +25,11 @@ const ApplicationTable = ({ applications, onEdit, onDelete, onStatusChange }: Pr
       <table style={{ width: '100%', borderCollapse: 'collapse' }}>
         <thead>
           <tr>
-            {['Empresa', 'Estado', 'Canal', 'Fecha', ''].map((col) => (
-              <th key={col} style={{
-                fontSize: 11, fontWeight: 500,
-                color: 'var(--color-text-secondary)',
-                textAlign: 'left', padding: '0 10px 10px',
-                borderBottom: '0.5px solid #F3F2F0',
-              }}>
-                {col}
-              </th>
-            ))}
+            <th style={{ fontSize: 11, fontWeight: 500, color: 'var(--color-text-secondary)', textAlign: 'left', padding: '0 10px 10px', borderBottom: '0.5px solid #F3F2F0' }}>Empresa</th>
+            <th style={{ fontSize: 11, fontWeight: 500, color: 'var(--color-text-secondary)', textAlign: 'left', padding: '0 10px 10px', borderBottom: '0.5px solid #F3F2F0' }}>Estado</th>
+            <th style={{ display: isMobile ? 'none' : 'table-cell', fontSize: 11, fontWeight: 500, color: 'var(--color-text-secondary)', textAlign: 'left', padding: '0 10px 10px', borderBottom: '0.5px solid #F3F2F0' }}>Canal</th>
+            <th style={{ fontSize: 11, fontWeight: 500, color: 'var(--color-text-secondary)', textAlign: 'left', padding: '0 10px 10px', borderBottom: '0.5px solid #F3F2F0' }}>Fecha</th>
+            <th style={{ borderBottom: '0.5px solid #F3F2F0' }}></th>
           </tr>
         </thead>
         <tbody>
@@ -89,7 +87,7 @@ const ApplicationTable = ({ applications, onEdit, onDelete, onStatusChange }: Pr
                 </td>
 
                 {/* Canal */}
-                <td style={{ padding: '10px 10px', verticalAlign: 'middle', fontSize: 12, color: 'var(--color-text-secondary)' }}>
+                <td style={{ display: isMobile ? 'none' : 'table-cell', padding: '10px 10px', verticalAlign: 'middle', fontSize: 12, color: 'var(--color-text-secondary)' }}>
                   {channelLabels[channel]}
                 </td>
 
@@ -100,32 +98,95 @@ const ApplicationTable = ({ applications, onEdit, onDelete, onStatusChange }: Pr
 
                 {/* Acciones */}
                 <td style={{ padding: '10px 10px', verticalAlign: 'middle' }}>
-                  <div style={{ display: 'flex', gap: 5 }}>
-                    <button
-                      onClick={() => onEdit(app)}
-                      style={{
-                        width: 26, height: 26, borderRadius: 6,
-                        border: '0.5px solid var(--color-border)',
-                        background: 'var(--color-bg)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        cursor: 'pointer',
-                      }}
-                    >
-                      <Pencil size={11} color="var(--color-text-secondary)" />
-                    </button>
-                    <button
-                      onClick={() => { setConfirmId(id); setConfirmCompany(company); }}
-                      style={{
-                        width: 26, height: 26, borderRadius: 6,
-                        border: '0.5px solid var(--color-red-light)',
-                        background: 'var(--color-red-light)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        cursor: 'pointer',
-                      }}
-                    >
-                      <Trash2 size={11} color="var(--color-red)" />
-                    </button>
-                  </div>
+                  {isMobile ? (
+                    // Menú de acciones en mobile
+                    <div style={{ position: 'relative' }}>
+                      <button
+                        onClick={() => setOpenMenuId(openMenuId === id ? null : id)}
+                        style={{
+                          width: 28, height: 28, borderRadius: 6,
+                          border: '0.5px solid var(--color-border)',
+                          background: 'var(--color-bg)',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        <MoreVertical size={13} color="var(--color-text-secondary)" />
+                      </button>
+
+                      {openMenuId === id && (
+                        <>
+                          {/* Overlay para cerrar */}
+                          <div
+                            onClick={() => setOpenMenuId(null)}
+                            style={{ position: 'fixed', inset: 0, zIndex: 10 }}
+                          />
+                          {/* Dropdown */}
+                          <div style={{
+                            position: 'absolute', right: 0, top: '110%',
+                            background: 'var(--color-surface)',
+                            border: '0.5px solid var(--color-border)',
+                            borderRadius: 'var(--radius-md)',
+                            boxShadow: 'var(--shadow-md)',
+                            padding: 4, minWidth: 140, zIndex: 11,
+                          }}>
+                            <div
+                              onClick={() => { onEdit(app); setOpenMenuId(null); }}
+                              style={{
+                                display: 'flex', alignItems: 'center', gap: 8,
+                                padding: '8px 12px', borderRadius: 6,
+                                fontSize: 13, color: 'var(--color-text-primary)',
+                                cursor: 'pointer',
+                              }}
+                            >
+                              <Pencil size={13} color="var(--color-text-secondary)" />
+                              Editar
+                            </div>
+                            <div
+                              onClick={() => { setConfirmId(id); setConfirmCompany(company); setOpenMenuId(null); }}
+                              style={{
+                                display: 'flex', alignItems: 'center', gap: 8,
+                                padding: '8px 12px', borderRadius: 6,
+                                fontSize: 13, color: 'var(--color-red)',
+                                cursor: 'pointer',
+                              }}
+                            >
+                              <Trash2 size={13} color="var(--color-red)" />
+                              Eliminar
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  ) : (
+                    // Botones normales en desktop
+                    <div style={{ display: 'flex', gap: 5 }}>
+                      <button
+                        onClick={() => onEdit(app)}
+                        style={{
+                          width: 26, height: 26, borderRadius: 6,
+                          border: '0.5px solid var(--color-border)',
+                          background: 'var(--color-bg)',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        <Pencil size={11} color="var(--color-text-secondary)" />
+                      </button>
+                      <button
+                        onClick={() => { setConfirmId(id); setConfirmCompany(company); }}
+                        style={{
+                          width: 26, height: 26, borderRadius: 6,
+                          border: '0.5px solid var(--color-red-light)',
+                          background: 'var(--color-red-light)',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        <Trash2 size={11} color="var(--color-red)" />
+                      </button>
+                    </div>
+                  )}
                 </td>
               </tr>
             );

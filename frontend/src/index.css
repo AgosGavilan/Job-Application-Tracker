@@ -16,8 +16,8 @@
   --color-border:        rgba(0, 0, 0, 0.07);
 
   --color-text-primary:  #1A1207;
-  --color-text-secondary:#A8A49E;
-  --color-text-muted:    #C8C5BF;
+  --color-text-secondary:#6B6860;
+  --color-text-muted:    #8C897F;
 
   --color-green:         #1B9B5E;
   --color-green-light:   #EDFAF4;
@@ -50,3 +50,29 @@ body {
 
 button { font-family: var(--font); cursor: pointer; }
 input, select, textarea { font-family: var(--font); }
+
+[data-theme="dark"] {
+  --color-primary:       #FB923C;
+  --color-primary-light: #2C1A0E;
+  --color-primary-dark:  #F97316;
+
+  --color-bg:            #0F0F0F;
+  --color-surface:       #1A1A1A;
+  --color-border:        rgba(255, 255, 255, 0.08);
+
+  --color-text-primary:  #F5F4F0;
+  --color-text-secondary:#7A7875;
+  --color-text-muted:    #4A4845;
+
+  --color-green:         #34D399;
+  --color-green-light:   #052E16;
+  --color-amber:         #FBBF24;
+  --color-amber-light:   #2D1B00;
+  --color-red:           #F87171;
+  --color-red-light:     #2D0A0A;
+  --color-blue:          #60A5FA;
+  --color-blue-light:    #0D1F3C;
+
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
+}
