@@ -1,13 +1,12 @@
-import { ClipboardList, Users, TrendingUp, Star, Clock } from 'lucide-react';
-import {
-  XAxis, YAxis, CartesianGrid,
-  Tooltip, ResponsiveContainer, Area, AreaChart
-} from 'recharts';
+import { useState } from 'react';
+import { ClipboardList, Users, TrendingUp, Star, Clock, BarChart2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useStats } from '../hooks/useStats';
 import { statusLabels } from '../utils/statusHelpers';
+import type { Application } from '../types';
 
 interface Props {
   refetchTrigger?: number;
+  applications: Application[];
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -18,6 +17,148 @@ const STATUS_COLORS: Record<string, string> = {
   offer:       '#1B9B5E',
 };
 
+// ─── Calendario ───────────────────────────────────────────────
+const Calendar = ({ applications }: { applications: Application[] }) => {
+  const today = new Date();
+  const [current, setCurrent] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
+
+  const year = current.getFullYear();
+  const month = current.getMonth();
+
+  const monthName = current.toLocaleDateString('es-AR', { month: 'long', year: 'numeric' });
+  const capitalized = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+
+  // Contar postulaciones por día
+  const countsByDay: Record<string, number> = {};
+  applications.forEach(app => {
+    const d = new Date(app.applied_at);
+    if (d.getFullYear() === year && d.getMonth() === month) {
+      const key = d.getDate().toString();
+      countsByDay[key] = (countsByDay[key] || 0) + 1;
+    }
+  });
+
+  // Primer día del mes (0=Dom, ajustamos a Lun=0)
+  const firstDay = new Date(year, month, 1).getDay();
+  const startOffset = firstDay === 0 ? 6 : firstDay - 1;
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const daysInPrevMonth = new Date(year, month, 0).getDate();
+
+  const cells: { day: number; type: 'prev' | 'current' | 'next' }[] = [];
+
+  for (let i = startOffset - 1; i >= 0; i--) {
+    cells.push({ day: daysInPrevMonth - i, type: 'prev' });
+  }
+  for (let i = 1; i <= daysInMonth; i++) {
+    cells.push({ day: i, type: 'current' });
+  }
+  while (cells.length % 7 !== 0) {
+    cells.push({ day: cells.filter(c => c.type === 'next').length + 1, type: 'next' });
+  }
+
+  const isToday = (day: number) =>
+    day === today.getDate() && month === today.getMonth() && year === today.getFullYear();
+
+  const prevMonth = () => setCurrent(new Date(year, month - 1, 1));
+  const nextMonth = () => setCurrent(new Date(year, month + 1, 1));
+
+  const dayLabels = ['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sá', 'Do'];
+
+  return (
+    <div>
+      {/* Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+        <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-text-primary)' }}>
+          {capitalized}
+        </span>
+        <div style={{ display: 'flex', gap: 3 }}>
+          <button
+            onClick={prevMonth}
+            style={{
+              width: 22, height: 22, borderRadius: 6,
+              border: '0.5px solid var(--color-border)',
+              background: 'var(--color-bg)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer',
+            }}
+          >
+            <ChevronLeft size={12} color="var(--color-text-secondary)" />
+          </button>
+          <button
+            onClick={nextMonth}
+            style={{
+              width: 22, height: 22, borderRadius: 6,
+              border: '0.5px solid var(--color-border)',
+              background: 'var(--color-bg)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer',
+            }}
+          >
+            <ChevronRight size={12} color="var(--color-text-secondary)" />
+          </button>
+        </div>
+      </div>
+
+      {/* Grilla */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 2 }}>
+
+        {/* Labels días */}
+        {dayLabels.map(d => (
+          <div key={d} style={{
+            fontSize: 9.5, color: 'var(--color-text-muted)',
+            textAlign: 'center', paddingBottom: 4, fontWeight: 500,
+          }}>
+            {d}
+          </div>
+        ))}
+
+        {/* Celdas */}
+        {cells.map((cell, i) => {
+          const count = cell.type === 'current' ? (countsByDay[cell.day.toString()] || 0) : 0;
+          const isCurrentToday = cell.type === 'current' && isToday(cell.day);
+
+          return (
+            <div
+              key={i}
+              style={{
+                aspectRatio: '1',
+                borderRadius: 6,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 10.5,
+                fontWeight: isCurrentToday ? 600 : 400,
+                color: cell.type !== 'current'
+                  ? 'var(--color-text-muted)'
+                  : isCurrentToday
+                    ? 'var(--color-primary)'
+                    : 'var(--color-text-primary)',
+                background: isCurrentToday ? 'var(--color-primary-light)' : 'transparent',
+                position: 'relative',
+              }}
+            >
+              {cell.day}
+
+              {/* Punto */}
+              {count > 0 && (
+                <div style={{
+                  position: 'absolute',
+                  bottom: 2,
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  width: count > 1 ? 5 : 4,
+                  height: count > 1 ? 5 : 4,
+                  borderRadius: '50%',
+                  background: count > 1 ? '#EA580C' : 'var(--color-primary)',
+                }} />
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+// ─── StatCard ─────────────────────────────────────────────────
 const StatCard = ({ icon: Icon, iconBg, iconColor, label, value, delta, deltaUp }: any) => (
   <div style={{
     background: 'var(--color-surface)',
@@ -36,7 +177,13 @@ const StatCard = ({ icon: Icon, iconBg, iconColor, label, value, delta, deltaUp 
     </div>
     <div style={{ flex: 1, minWidth: 0 }}>
       <div style={{ fontSize: 11, color: 'var(--color-text-secondary)', marginBottom: 2 }}>{label}</div>
-      <div style={{ fontSize: 18, fontWeight: 600, color: 'var(--color-text-primary)', letterSpacing: '-0.03em', lineHeight: 1 }}>{value}</div>
+      <div style={{
+        fontSize: 18, fontWeight: 600,
+        color: 'var(--color-text-primary)',
+        letterSpacing: '-0.03em', lineHeight: 1,
+      }}>
+        {value}
+      </div>
     </div>
     {delta && (
       <span style={{
@@ -52,13 +199,19 @@ const StatCard = ({ icon: Icon, iconBg, iconColor, label, value, delta, deltaUp 
   </div>
 );
 
-const StatsPanel = ({ refetchTrigger }: Props) => {
-  const { summary, weekly, loading } = useStats(refetchTrigger);
+// ─── StatsPanel ───────────────────────────────────────────────
+const StatsPanel = ({ refetchTrigger, applications }: Props) => {
+  const { summary, loading } = useStats(refetchTrigger);
 
-  if (loading) return <p style={{ fontSize: 13, color: 'var(--color-text-secondary)' }}>Cargando estadísticas...</p>;
+  if (loading) return (
+    <p style={{ fontSize: 13, color: 'var(--color-text-secondary)', marginBottom: 24 }}>
+      Cargando estadísticas...
+    </p>
+  );
+
   if (!summary) return null;
 
-  const barData = summary.byStatus.map(({ status, count }) => ({
+  const barData = summary.byStatus.map(({ status, count }: { status: string; count: number }) => ({
     name: statusLabels[status as keyof typeof statusLabels] || status,
     count,
     color: STATUS_COLORS[status] || '#A8A49E',
@@ -83,61 +236,68 @@ const StatsPanel = ({ refetchTrigger }: Props) => {
           Análisis de postulaciones
         </div>
 
-        <div style={{ display: 'flex', gap: 20 }}>
+        {summary.total === 0 ? (
+          <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--color-text-secondary)' }}>
+            <BarChart2 size={32} color="var(--color-text-muted)" style={{ margin: '0 auto 10px', display: 'block' }} />
+            <p style={{ fontSize: 14, fontWeight: 500 }}>Sin datos todavía</p>
+            <p style={{ fontSize: 12.5, marginTop: 4 }}>
+              Agregá tu primera postulación para ver el análisis
+            </p>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', gap: 24 }}>
 
-          {/* Barras horizontales por estado */}
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 10.5, color: 'var(--color-text-secondary)', fontWeight: 500, letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: 12 }}>
-              Por estado
-            </div>
-            {barData.map(({ name, count, color }) => {
-              const pct = summary.total > 0 ? Math.round((count / summary.total) * 100) : 0;
-              return (
-                <div key={name} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 9 }}>
-                  <div style={{ fontSize: 11.5, color: '#4A4640', width: 76, flexShrink: 0 }}>{name}</div>
-                  <div style={{ flex: 1, height: 7, background: '#F3F2F0', borderRadius: 99, overflow: 'hidden' }}>
-                    <div style={{ width: `${pct}%`, height: '100%', background: color, borderRadius: 99, transition: 'width 0.4s ease' }} />
+            {/* Barras horizontales */}
+            <div style={{ flex: 1 }}>
+              <div style={{
+                fontSize: 10.5, color: 'var(--color-text-secondary)',
+                fontWeight: 500, letterSpacing: '0.04em',
+                textTransform: 'uppercase', marginBottom: 12,
+              }}>
+                Por estado
+              </div>
+              {barData.map(({ name, count, color }: { name: string; count: number; color: string }) => {
+                const pct = summary.total > 0 ? Math.round((count / summary.total) * 100) : 0;
+                return (
+                  <div key={name} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 9 }}>
+                    <div style={{ fontSize: 11.5, color: '#4A4640', width: 76, flexShrink: 0 }}>{name}</div>
+                    <div style={{ flex: 1, height: 7, background: '#F3F2F0', borderRadius: 99, overflow: 'hidden' }}>
+                      <div style={{
+                        width: `${pct}%`, height: '100%',
+                        background: color, borderRadius: 99,
+                        transition: 'width 0.4s ease',
+                      }} />
+                    </div>
+                    <div style={{
+                      fontSize: 11, color: 'var(--color-text-secondary)',
+                      width: 16, textAlign: 'right', fontWeight: 500,
+                    }}>
+                      {count}
+                    </div>
                   </div>
-                  <div style={{ fontSize: 11, color: 'var(--color-text-secondary)', width: 16, textAlign: 'right', fontWeight: 500 }}>{count}</div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Línea tendencia semanal */}
-          <div style={{ width: 160, flexShrink: 0 }}>
-            <div style={{ fontSize: 10.5, color: 'var(--color-text-secondary)', fontWeight: 500, letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: 12 }}>
-              Tendencia semanal
+                );
+              })}
             </div>
-            {weekly.length > 0 ? (
-              <ResponsiveContainer width="100%" height={90}>
-                <AreaChart data={weekly} margin={{ top: 4, right: 4, left: -30, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="colorGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#F97316" stopOpacity={0.15} />
-                      <stop offset="100%" stopColor="#F97316" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#F3F2F0" vertical={false} />
-                  <XAxis dataKey="week" tick={{ fontSize: 9, fill: '#C8C5BF' }} tickLine={false} axisLine={false} />
-                  <YAxis tick={{ fontSize: 9, fill: '#C8C5BF' }} tickLine={false} axisLine={false} allowDecimals={false} />
-                  <Tooltip
-                    contentStyle={{ borderRadius: 8, border: '0.5px solid var(--color-border)', fontSize: 12 }}
-                    formatter={(v) => [`${v} postulaciones`, '']}
-                  />
-                  <Area type="monotone" dataKey="count" stroke="#F97316" strokeWidth={2} fill="url(#colorGrad)" dot={{ r: 3, fill: '#F97316', strokeWidth: 0 }} activeDot={{ r: 4 }} />
-                </AreaChart>
-              </ResponsiveContainer>
-            ) : (
-              <p style={{ fontSize: 11.5, color: 'var(--color-text-secondary)', marginTop: 8 }}>
-                Agregá postulaciones con distintas fechas para ver la tendencia.
-              </p>
-            )}
+
+            {/* Separador */}
+            <div style={{ width: '0.5px', background: 'var(--color-border)', flexShrink: 0 }} />
+
+            {/* Calendario */}
+            <div style={{ width: 168, flexShrink: 0 }}>
+              <div style={{
+                fontSize: 10.5, color: 'var(--color-text-secondary)',
+                fontWeight: 500, letterSpacing: '0.04em',
+                textTransform: 'uppercase', marginBottom: 12,
+              }}>
+                Actividad mensual
+              </div>
+              <Calendar applications={applications} />
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
-      {/* DERECHA — Stat cards compactas */}
+      {/* DERECHA — Stat cards */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         <StatCard
           icon={ClipboardList}
@@ -153,8 +313,10 @@ const StatsPanel = ({ refetchTrigger }: Props) => {
           iconBg="var(--color-green-light)"
           iconColor="var(--color-green)"
           label="Entrevistas"
-          value={summary.byStatus.find(s => s.status === 'interview')?.count || 0}
-          delta={summary.byStatus.find(s => s.status === 'interview')?.count ? `+${summary.byStatus.find(s => s.status === 'interview')?.count}` : null}
+          value={summary.byStatus.find((s: any) => s.status === 'interview')?.count || 0}
+          delta={summary.byStatus.find((s: any) => s.status === 'interview')?.count
+            ? `+${summary.byStatus.find((s: any) => s.status === 'interview')?.count}`
+            : null}
           deltaUp={true}
         />
         <StatCard
@@ -171,8 +333,8 @@ const StatsPanel = ({ refetchTrigger }: Props) => {
           iconBg="var(--color-green-light)"
           iconColor="var(--color-green)"
           label="Ofertas recibidas"
-          value={summary.byStatus.find(s => s.status === 'offer')?.count || 0}
-          delta={summary.byStatus.find(s => s.status === 'offer')?.count ? '¡nuevo!' : null}
+          value={summary.byStatus.find((s: any) => s.status === 'offer')?.count || 0}
+          delta={summary.byStatus.find((s: any) => s.status === 'offer')?.count ? '¡nuevo!' : null}
           deltaUp={true}
         />
         <StatCard

@@ -1,6 +1,8 @@
 import { Pencil, Trash2 } from 'lucide-react';
 import type { Application } from '../types';
 import { statusLabels, statusColors, statusBgColors, channelLabels } from '../utils/statusHelpers';
+import { useState } from 'react';
+import ConfirmModal from './ConfirmModal';
 
 interface Props {
   applications: Application[];
@@ -10,6 +12,9 @@ interface Props {
 }
 
 const ApplicationTable = ({ applications, onEdit, onDelete, onStatusChange }: Props) => {
+  const [confirmId, setConfirmId] = useState<number | null>(null);
+  const [confirmCompany, setConfirmCompany] = useState('');
+
   if (applications.length === 0) return null;
 
   return (
@@ -109,7 +114,7 @@ const ApplicationTable = ({ applications, onEdit, onDelete, onStatusChange }: Pr
                       <Pencil size={11} color="var(--color-text-secondary)" />
                     </button>
                     <button
-                      onClick={() => { if (confirm(`¿Eliminar la postulación en ${company}?`)) onDelete(id); }}
+                      onClick={() => { setConfirmId(id); setConfirmCompany(company); }}
                       style={{
                         width: 26, height: 26, borderRadius: 6,
                         border: '0.5px solid var(--color-red-light)',
@@ -127,6 +132,16 @@ const ApplicationTable = ({ applications, onEdit, onDelete, onStatusChange }: Pr
           })}
         </tbody>
       </table>
+      {confirmId !== null && (
+        <ConfirmModal
+          company={confirmCompany}
+          onConfirm={() => {
+            onDelete(confirmId);
+            setConfirmId(null);
+          }}
+          onCancel={() => setConfirmId(null)}
+        />
+      )}
     </div>
   );
 };

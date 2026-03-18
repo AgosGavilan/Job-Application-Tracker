@@ -49,7 +49,7 @@ const Home = () => {
         </div>
 
         {/* Stats + gráficos */}
-        <StatsPanel refetchTrigger={statsVersion} />
+        <StatsPanel refetchTrigger={statsVersion} applications={applications}/>
 
         {/* Tabla */}
         <div style={{
