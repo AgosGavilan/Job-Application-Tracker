@@ -1,16 +1,17 @@
 import { Pool } from 'pg';
 import dotenv from 'dotenv';
+import dns from 'dns';
 
 dotenv.config();
 
+dns.setDefaultResultOrder('ipv4first');
+
+const isProduction = process.env.NODE_ENV === 'production';
+
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false },
-} as any);
-
-// Forzar IPv4 a nivel de DNS
-import dns from 'dns';
-dns.setDefaultResultOrder('ipv4first');
+  ...(isProduction && { ssl: { rejectUnauthorized: false } }),
+});
 
 pool.on('error', (err) => {
   console.error('Unexpected error on idle client', err);
