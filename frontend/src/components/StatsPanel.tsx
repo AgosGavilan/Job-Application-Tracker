@@ -32,7 +32,7 @@ const Calendar = ({ applications }: { applications: Application[] }) => {
   // Contar postulaciones por día
   const countsByDay: Record<string, number> = {};
   applications.forEach(app => {
-    const d = new Date(app.applied_at);
+    const d = new Date(app.applied_at + 'T00:00:00');
     if (d.getFullYear() === year && d.getMonth() === month) {
       const key = d.getDate().toString();
       countsByDay[key] = (countsByDay[key] || 0) + 1;
