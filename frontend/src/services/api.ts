@@ -2,7 +2,7 @@ import axios from "axios";
 import type { Application } from "../types";
 
 const api = axios.create({
-    baseURL: 'http://localhost:3000/api',
+    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
 });
 
 // Interceptor: agrega el token JWT en cada request automáticamente
