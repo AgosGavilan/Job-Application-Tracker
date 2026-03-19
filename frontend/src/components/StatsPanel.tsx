@@ -32,9 +32,10 @@ const Calendar = ({ applications }: { applications: Application[] }) => {
   // Contar postulaciones por día
   const countsByDay: Record<string, number> = {};
   applications.forEach(app => {
-    const d = new Date(app.applied_at + 'T00:00:00');
-    if (d.getFullYear() === year && d.getMonth() === month) {
-      const key = d.getDate().toString();
+    const dateStr = app.applied_at.slice(0, 10); // "2026-03-19"
+    const [y, m, d] = dateStr.split('-').map(Number);
+    if (y === year && m - 1 === month) {
+      const key = d.toString();
       countsByDay[key] = (countsByDay[key] || 0) + 1;
     }
   });
