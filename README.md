@@ -4,7 +4,7 @@ Una app fullstack para registrar y hacer seguimiento de tus postulaciones labora
 
 > Proyecto de portafolio — construido con React, Node.js, PostgreSQL y Docker.
 
-![Home](./assets/home.png)
+**[Ver app en producción](https://job-application-tracker-one-indol.vercel.app/)**
 
 ---
 
@@ -31,6 +31,9 @@ Una app fullstack para registrar y hacer seguimiento de tus postulaciones labora
 | Iconos | Lucide React |
 | Gráficos | Recharts |
 | DevOps | Docker + Docker Compose |
+| Deploy frontend | Vercel |
+| Deploy backend | Render |
+| Deploy DB | Supabase |
 
 ---
 
@@ -164,6 +167,16 @@ Las migraciones se corren con `npm run migrate` y crean las tablas automáticame
 
 ---
 
+## 🌐 Deploy
+ 
+| Servicio | Plataforma | URL |
+|----------|-----------|-----|
+| Frontend | Vercel | [job-application-tracker-one-indol.vercel.app](https://job-application-tracker-one-indol.vercel.app/) |
+| Backend | Render | https://job-tracker-backend-0czz.onrender.com |
+| Base de datos | Supabase | — |
+ 
+---
+
 ## 💡 Qué aprendí construyendo esto
 
 - Cómo estructurar un proyecto fullstack separando frontend y backend desde el inicio
@@ -172,8 +185,11 @@ Las migraciones se corren con `npm run migrate` y crean las tablas automáticame
 - Queries SQL con parámetros tipados para evitar SQL injection
 - Interceptors de axios para manejar tokens y errores 401 globalmente
 - Custom hooks en React para separar lógica de UI
+- Context API para estado global (tema oscuro/claro)
+- Diseño responsive con breakpoints manejados desde React
 - Docker Compose para orquestar servicios de desarrollo
-- Diseño de UI sin librerías de componentes — CSS-in-JS con variables CSS
+- Deploy fullstack con Vercel + Render + Supabase
+- Variables de entorno para separar configuración de desarrollo y producción
 
 ---
 
