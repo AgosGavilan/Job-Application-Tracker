@@ -11,10 +11,17 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors({
-  origin: [
-    'http://localhost:5173',
-    'https://job-application-tracker-one-indol.vercel.app',
-  ],
+  origin: (origin, callback) => {
+    const allowed = [
+      'http://localhost:5173',
+      /^https:\/\/job-application-tracker.*\.vercel\.app$/,
+    ];
+    if (!origin || allowed.some(o => typeof o === 'string' ? o === origin : o.test(origin))) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
 }));
 app.use(express.json());
