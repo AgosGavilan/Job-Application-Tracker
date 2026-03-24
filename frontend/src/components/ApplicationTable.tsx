@@ -37,7 +37,9 @@ const ApplicationTable = ({ applications, onEdit, onDelete, onStatusChange }: Pr
           {applications.map((app) => {
             const { id, company, position, status, channel, applied_at } = app;
 
-            const formattedDate = new Date(applied_at + 'T12:00:00').toLocaleDateString('es-AR', {
+            const dateStr = applied_at.slice(0, 10); // toma solo "2026-03-23"
+            const [y, m, d] = dateStr.split('-').map(Number);
+            const formattedDate = new Date(y, m - 1, d).toLocaleDateString('es-AR', {
               day: '2-digit', month: 'short',
             });
 
