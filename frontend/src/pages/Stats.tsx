@@ -139,7 +139,7 @@ const Stats = () => {
           <KpiCard icon={ClipboardList} iconBg="var(--color-primary-light)" iconColor="var(--color-primary)" label="Total postulaciones" value={summary?.total || 0} delta="total" deltaUp={false} />
           <KpiCard icon={TrendingUp} iconBg="var(--color-green-light)" iconColor="var(--color-green)" label="Tasa de respuesta" value={`${summary?.responseRate || 0}%`} delta={summary?.responseRate ? `↑${summary.responseRate}%` : null} deltaUp={true} />
           <KpiCard icon={Users} iconBg="var(--color-blue-light)" iconColor="var(--color-blue)" label="Entrevistas" value={interviews} delta={interviews > 0 ? `+${interviews}` : null} deltaUp={true} />
-          <KpiCard icon={Clock} iconBg="var(--color-primary-light)" iconColor="var(--color-primary)" label="Días prom. respuesta" value={`${summary?.avgResponseDays || 0}d`} delta="promedio" deltaUp={false} />
+          <KpiCard icon={Clock} iconBg="var(--color-primary-light)" iconColor="var(--color-primary)" label="Días prom. respuesta" value={`${summary?.avgResponseDays || 0} d`} delta="promedio" deltaUp={false} />
         </div>
 
         {/* Gráficos */}
